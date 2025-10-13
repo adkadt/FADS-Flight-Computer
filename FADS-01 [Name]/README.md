@@ -1,7 +1,7 @@
 # FADS-01 \[Name\]
+First version of FADS (Flight Avionics &amp; Data System)
 
-First version of FADS
-Primary Language C++
+**Primary Language**: C++
 
 ## Goals
 + Automatically detect launch and landings
