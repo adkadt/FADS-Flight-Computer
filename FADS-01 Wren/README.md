@@ -5,9 +5,10 @@ First version of FADS (Flight Avionics &amp; Data System)
 
 ## Goals
 + Automatically detect launch and landings
-+ Meausre altitude reliably and accurately
++ Measure altitude reliably and accurately
 
 ## Sensors
 + IMU
 
 + Barometer
+
