@@ -9,6 +9,6 @@ First version of FADS (Flight Avionics &amp; Data System)
 
 ## Sensors
 + IMU
-
 + Barometer
+
 
