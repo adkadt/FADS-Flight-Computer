@@ -7,10 +7,7 @@ First version of FADS (Flight Avionics &amp; Data System)
 + Automatically detect launch and landings
 + Meausre altitude reliably and accurately
 
-### Stretch Goals
-+ Get GPS posititioning 
-+ Realtime data transmission using LoRaWAN
-
 ## Sensors
 + IMU
+
 + Barometer
