@@ -30,6 +30,7 @@ locationData GpsManager::GetLocationData() {
     data.lat = gps_.location.lat();
     data.lng = gps_.location.lng();
     data.sats = gps_.satellites.value();
+    data.alt = gps_.altitude.feet();
     data.is_valid = gps_.location.isValid();
     return data;
 }

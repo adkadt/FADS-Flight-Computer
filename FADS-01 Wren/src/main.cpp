@@ -19,7 +19,7 @@ void loop() {
         locationData gps_data = gps.GetLocationData();
         
         if (gps_data.is_valid) {
-            Serial.printf("Lat %.6f, Lng %.6f, Sats %d\n", gps_data.lat, gps_data.lng, gps_data.sats);
+            Serial.printf("Lat %.6f, Lng %.6f, Alt %.2fft, Sats %d\n", gps_data.lat, gps_data.lng, gps_data.alt, gps_data.sats);
         } else {
             Serial.println("Waiting for FIX");
         }

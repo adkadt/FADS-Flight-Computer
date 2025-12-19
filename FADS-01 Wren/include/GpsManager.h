@@ -7,6 +7,7 @@
 struct locationData {
     double lat;
     double lng;
+    double alt;
     uint32_t sats;
     bool is_valid;
 };
