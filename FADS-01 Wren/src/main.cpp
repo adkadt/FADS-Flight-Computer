@@ -4,14 +4,16 @@
 // GPS using Serial4 pins (TX4 17, RX4 16)
 #define GPS_SERIAL Serial4
 
-GpsManager gps(GPS_SERIAL, 9600);
+GpsManager gps(GPS_SERIAL, 115200);
 
 void setup() {
     Serial.begin(115200);      // USB Serial for Monitor
     gps.Begin();    // starts gps
-    
     Serial.println("Teensy 4.1 GPS Initialized");
 }
+
+int last_gps_time = 0;
+double sps;
 
 void loop() {
     // updates gps and if sucessful prints data
@@ -23,6 +25,12 @@ void loop() {
         } else {
             Serial.println("Waiting for FIX");
         }
+
+        if(last_gps_time != 0){
+            sps = 1 / ((millis() - last_gps_time) / 1000.0);
+            Serial.printf("GPS SPS: %.2f\n", sps);
+        }
+        last_gps_time = millis();
     }
 
 }
