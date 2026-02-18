@@ -10,6 +10,8 @@
 GpsManager gps(GPS_SERIAL, 115200);
 BmpManager bmp;
 ImuManager imu;
+RadioManager radio;
+bool radio_active = false;
 
 double zero_altitude;
 
@@ -30,6 +32,13 @@ void setup() {
     if (!imu.Begin()) {
         Serial.println("--IMU FAILED TO START--");
     }
+
+    if (!radio.Begin()) {
+        Serial.println("--LO RA FAILED TO START--");
+    } else {
+        radio_active = true;
+    }
+
     bmp.SetMode(BMP5XX_POWERMODE_CONTINUOUS, BMP5XX_ODR_240_HZ);
     bmp.SetTempOSR(BMP5XX_OVERSAMPLING_1X);
     bmp.SetPressureOSR(BMP5XX_OVERSAMPLING_1X);
@@ -52,6 +61,7 @@ int counter = 0;
 void loop() {
     bool update = false;
     bool printed = false;
+    char radio_buf[64]; // Buffer for radio packets
     
     // updates gps and if sucessful prints data
     if (gps.Update()) {
@@ -61,6 +71,11 @@ void loop() {
         if (gps_data.is_valid) {
             Serial.printf("Lat %.6f, Lng %.6f, Alt %.2fft, Sats %d\n", gps_data.lat, gps_data.lng, gps_data.alt, gps_data.sats);
             printed = true;
+            // Send GPS packet
+            snprintf(radio_buf, sizeof(radio_buf), "GPS:%.4f,%.4f,%.0f", gps_data.lat, gps_data.lng, gps_data.alt);
+            if (radio_active) {
+                radio.Transmit(radio_buf);
+            }
         } else {
             Serial.println("Waiting for FIX");
             printed = true;
@@ -80,6 +95,11 @@ void loop() {
         if (counter % 20 == 0) {
             Serial.printf("Pressure: %.1fhPa, Altitude %.2fm, Temperature: %.1fC\n", bmp_data.pressure, bmp_data.altitude-zero_altitude, bmp_data.temperature);
             printed = true;
+            // Send Altitude packet
+            snprintf(radio_buf, sizeof(radio_buf), "ALT:%.1f,P:%.1f", bmp_data.altitude-zero_altitude, bmp_data.pressure);
+            if (radio_active) {
+                radio.Transmit(radio_buf);
+            }
         }
     
         if(last_bmp_time != -1 && counter % 100 == 0){
