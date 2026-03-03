@@ -3,6 +3,7 @@
 #include "GpsManager.h"
 #include "BmpManager.h"
 #include "ImuManager.h"
+#include "RadioManager.h"
 
 // GPS using Serial5 pins (TX5 20, RX5 21)
 #define GPS_SERIAL Serial5
@@ -34,7 +35,7 @@ void setup() {
     }
 
     if (!radio.Begin()) {
-        Serial.println("--LO RA FAILED TO START--");
+        Serial.println("--LORA FAILED TO START--");
     } else {
         radio_active = true;
     }
@@ -57,71 +58,61 @@ int last_bmp_time = -1;
 double sps;
 
 int counter = 0;
+    unsigned long last_tx_time = 0;
 
 void loop() {
     bool update = false;
     bool printed = false;
     char radio_buf[64]; // Buffer for radio packets
     
-    // updates gps and if sucessful prints data
-    if (gps.Update()) {
-        update = true;
-        locationData gps_data = gps.GetLocationData();
+    // // updates gps and if sucessful prints data
+    // if (gps.Update()) {
+    //     update = true;
+    //     locationData gps_data = gps.GetLocationData();
         
-        if (gps_data.is_valid) {
-            Serial.printf("Lat %.6f, Lng %.6f, Alt %.2fft, Sats %d\n", gps_data.lat, gps_data.lng, gps_data.alt, gps_data.sats);
-            printed = true;
-            // Send GPS packet
-            snprintf(radio_buf, sizeof(radio_buf), "GPS:%.4f,%.4f,%.0f", gps_data.lat, gps_data.lng, gps_data.alt);
-            if (radio_active) {
-                radio.Transmit(radio_buf);
-            }
-        } else {
-            Serial.println("Waiting for FIX");
-            printed = true;
-        }
+    //     if (gps_data.is_valid) {
+    //         Serial.printf("Lat %.6f, Lng %.6f, Alt %.2fft, Sats %d\n", gps_data.lat, gps_data.lng, gps_data.alt, gps_data.sats);
+    //         printed = true;
+    //         // Send GPS packet
+    //         snprintf(radio_buf, sizeof(radio_buf), "GPS:%.4f,%.4f,%.0f", gps_data.lat, gps_data.lng, gps_data.alt);
+    //         if (radio_active) {
+    //             radio.Transmit(radio_buf);
+    //         }
+    //     } else {
+    //         Serial.println("Waiting for FIX");
+    //         printed = true;
+    //     }
 
-        if(last_gps_time != 0 && counter % 100 == 0){
-            sps = 1 / ((millis() - last_gps_time) / 1000.0);
-            Serial.printf("GPS SPS: %.1f\n", sps);
-            printed = true;
-        }
-        last_gps_time = millis();
-    }
+    //     if(last_gps_time != 0 && counter % 100 == 0){
+    //         sps = 1 / ((millis() - last_gps_time) / 1000.0);
+    //         Serial.printf("GPS SPS: %.1f\n", sps);
+    //         printed = true;
+    //     }
+    //     last_gps_time = millis();
+    // }
 
     if (bmp.Update()) {
-        update = true;
-        bmpData bmp_data = bmp.GetBmpData();
-        if (counter % 20 == 0) {
-            Serial.printf("Pressure: %.1fhPa, Altitude %.2fm, Temperature: %.1fC\n", bmp_data.pressure, bmp_data.altitude-zero_altitude, bmp_data.temperature);
-            printed = true;
-            // Send Altitude packet
-            snprintf(radio_buf, sizeof(radio_buf), "ALT:%.1f,P:%.1f", bmp_data.altitude-zero_altitude, bmp_data.pressure);
+        if (millis() - last_tx_time >= 1000) {
+            last_tx_time = millis();
+            bmpData bmp_data = bmp.GetBmpData();
+            snprintf(radio_buf, sizeof(radio_buf), "ALT:%.2f", bmp_data.altitude - zero_altitude);
             if (radio_active) {
                 radio.Transmit(radio_buf);
+                Serial.printf("TX: %s\n", radio_buf);
             }
         }
-    
-        if(last_bmp_time != -1 && counter % 100 == 0){
-            sps = 100.0 / ((micros() - last_bmp_time) / 1000000.0);
-            Serial.printf("BMP SPS: %.1f\n", sps);
-            printed = true;
-            last_bmp_time = micros();
-        }else if(last_bmp_time == -1){
-            last_bmp_time = micros();
-        }
     }
 
-    if (imu.Update()) {
-        update = true;
-        imuData imu_data = imu.GetImuData();
 
-        if (counter % 20 == 0) {
-            Serial.printf("Tilt: %.1f | R: %.1f, P: %.1f, Y: %.1f\n", 
-                          imu.GetTilt(), imu.GetRoll(), imu.GetPitch(), imu.GetYaw());
-            printed = true;
-        }
-    }
+    // if (imu.Update()) {
+    //     update = true;
+
+    //     if (counter % 20 == 0) {
+    //         Serial.printf("Tilt: %.1f | R: %.1f, P: %.1f, Y: %.1f\n", 
+    //                       imu.GetTilt(), imu.GetRoll(), imu.GetPitch(), imu.GetYaw());
+    //         printed = true;
+    //     }
+    // }
 
     if (update) {
         counter++;
