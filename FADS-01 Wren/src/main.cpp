@@ -18,7 +18,7 @@ double zero_altitude;
 
 void setup() {
     Serial.begin(115200);    // USB Serial for Monitor
-    while (!Serial) delay(10);      // Wait for Serial Monitor to open [REMOVE FOR FLIGHT]
+    // while (!Serial) delay(10);      // Wait for Serial Monitor to open [REMOVE FOR FLIGHT]
 
     // set up i2c
     Wire.begin();
