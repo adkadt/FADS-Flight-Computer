@@ -1,13 +1,13 @@
 #include "ImuManager.h"
 
-ImuManager::ImuManager() {
+ImuManager::ImuManager() : bno08x_(BNO085_RST) {
     // Initialize struct to zero
     current_data_ = {0};
 }
 
 bool ImuManager::Begin() {
     // Initialize BNO08x on default I2C address (0x4A)
-    if (!bno08x_.begin_I2C()) {
+    if (!bno08x_.begin_I2C(BNO08x_I2CADDR_DEFAULT, &Wire)) {
         return false;
     }
 
