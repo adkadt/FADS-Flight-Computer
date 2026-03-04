@@ -51,6 +51,10 @@ void setup() {
     zero_altitude = bmp_data.altitude;
 
     Serial.println("Teensy 4.1 GPS Initialized");
+    if (radio_active) {
+        delay(500); // Give power time to stabilize before high-current TX
+        radio.Transmit("Wren Flight Computer Initialized");
+    }
 }
 
 int last_gps_time = 0;
@@ -58,7 +62,7 @@ int last_bmp_time = -1;
 double sps;
 
 int counter = 0;
-    unsigned long last_tx_time = 0;
+unsigned long last_print_time = 0;
 
 void loop() {
     bool update = false;
@@ -91,17 +95,36 @@ void loop() {
     //     last_gps_time = millis();
     // }
 
-    if (bmp.Update()) {
-        if (millis() - last_tx_time >= 1000) {
-            last_tx_time = millis();
-            bmpData bmp_data = bmp.GetBmpData();
-            snprintf(radio_buf, sizeof(radio_buf), "ALT:%.2f", bmp_data.altitude - zero_altitude);
+    if (gps.Update()) {
+        locationData gps_data = gps.GetLocationData();
+        
+        if (gps_data.is_valid) {
+            snprintf(radio_buf, sizeof(radio_buf), "GPS:%.4f,%.4f,%.0f", gps_data.lat, gps_data.lng, gps_data.alt);
             if (radio_active) {
                 radio.Transmit(radio_buf);
                 Serial.printf("TX: %s\n", radio_buf);
             }
         }
+    } else {
+        if (millis() - last_print_time > 1000) {
+            snprintf(radio_buf, sizeof(radio_buf), "Waiting for FIX");
+            if (radio_active){
+                radio.Transmit(radio_buf);
+                Serial.println("TX: Waiting for FIX");
+            }    
+            last_print_time = millis();
+        }
     }
+
+    // if (bmp.Update()) {
+    //     bmpData bmp_data = bmp.GetBmpData();
+
+    //     snprintf(radio_buf, sizeof(radio_buf), "ALT:%.2f", bmp_data.altitude - zero_altitude);
+    //     if (radio_active) {
+    //         radio.Transmit(radio_buf);
+    //         Serial.printf("TX: %s\n", radio_buf);
+    //     }
+    // }
 
 
     // if (imu.Update()) {
@@ -120,6 +143,12 @@ void loop() {
 
     if (printed) {
         Serial.println("==================");
+    }
+
+    static unsigned long last_ping = 0;
+    if (millis() - last_ping >= 1000) {
+        last_ping = millis();
+        Serial.printf("Alive Ping: %d\n", millis() / 1000);
     }
 
 }
