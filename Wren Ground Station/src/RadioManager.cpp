@@ -25,8 +25,8 @@ bool RadioManager::Begin() {
     rf95_.setTxPower(23, false);
 
     // Setup Addressing
-    rf95_.setThisAddress(FC_ADDR);
-    rf95_.setHeaderTo(GS_ADDR);
+    rf95_.setThisAddress(GS_ADDR);
+    rf95_.setHeaderTo(FC_ADDR);
 
     return true;
 }
