@@ -22,7 +22,7 @@ bool RadioManager::Begin() {
     }
 
     // Tx power to 23 dBm (max supported by module)
-    rf95_.setTxPower(23, false);
+    rf95_.setTxPower(13, false);
 
     // Setup Addressing
     rf95_.setThisAddress(FC_ADDR);
@@ -34,7 +34,7 @@ bool RadioManager::Begin() {
 void RadioManager::Transmit(String data) {
     // Send length() + 1 to include the null terminator so the receiver knows when the string ends
     rf95_.send((uint8_t *)data.c_str(), data.length() + 1);
-    // rf95_.waitPacketSent(); // Blocking wait removed
+    rf95_.waitPacketSent();
 }
 
 String RadioManager::Receive() {
