@@ -58,8 +58,8 @@ void setup() {
     while (!bmp.Update()) {
         delay(10);
     }
-    bmpData bmp_data = bmp.GetBmpData();
-    zero_altitude = bmp_data.altitude;
+    BmpData bmp_data = bmp.GetBmpData();
+    ground_altitude_m = bmp_data.altitude;
 
     Serial.println("Teensy 4.1 GPS Initialized");
     if (radio_active) {
@@ -102,8 +102,10 @@ void loop() {
         }
     }
 
-    // if (bmp.Update()) {
-    //     bmpData bmp_data = bmp.GetBmpData();
+    // gather raw altitude data
+    BmpData raw_bmp_data;
+    if (bmp.Update()) {
+        raw_bmp_data = bmp.GetBmpData();
 
         snprintf(radio_buf, sizeof(radio_buf), "ALT:%.2f", raw_bmp_data.altitude - ground_altitude_m);
         if (radio_active) {
@@ -131,7 +133,7 @@ void loop() {
         default:
             break;
     }
-
+    
     // if (imu.Update()) {
     //     update = true;
 
@@ -141,11 +143,11 @@ void loop() {
     //         printed = true;
     //     }
     // }
-
+    
     if (update) {
         counter++;
     }
-
+    
     if (printed) {
         Serial.println("==================");
     }

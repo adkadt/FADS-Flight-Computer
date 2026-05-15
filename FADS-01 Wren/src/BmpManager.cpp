@@ -56,8 +56,8 @@ bool BmpManager::Update() {
     return false;
 }
 
-bmpData BmpManager::GetBmpData() {
-    bmpData data;
+BmpData BmpManager::GetBmpData() {
+    BmpData data;
     data.pressure = bmp_.readPressure();
     data.temperature = bmp_.readTemperature();
     data.altitude = bmp_.readAltitude();

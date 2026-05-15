@@ -10,7 +10,7 @@
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-struct bmpData {
+struct BmpData {
     double temperature;
     double pressure;
     double altitude;
@@ -27,7 +27,7 @@ class BmpManager {
         bool SetPressureOSR(const bmp5xx_oversampling_t osr);
         bool setIIRCoeff(const bmp5xx_iir_filter_t coef);
         bool Update();
-        bmpData GetBmpData();
+        BmpData GetBmpData();
 };
 
 #endif
